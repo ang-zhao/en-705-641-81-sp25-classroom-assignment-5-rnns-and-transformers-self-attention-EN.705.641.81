@@ -40,14 +40,15 @@ class CausalSelfAttention(nn.Module):
         #   The matrix should has 1s in the lower left triangular part (including the diagonal) and 0s in the upper right.
         #   Name the matrix `causal_mask`
         # Hint: you can check torch.tril for creating the matrix with the help of torch.ones.
-
+        causal_mask = torch.tril(torch.ones(config.block_size, config.block_size))
         # your code ends here
 
         # expand the mask for the batch and head dimensions
+        causal_mask = causal_mask.view(1, 1, config.block_size, config.block_size)
 
         # register the mask as a buffer so it's not updated as a model parameter
         # but can still be used in the forward pass & saved to the state_dict
-        self.register_buffer("causal_mask", casual_mask)
+        self.register_buffer("causal_mask", causal_mask)
         self.n_head = config.n_head
         self.n_embd = config.n_embd
 
@@ -57,7 +58,7 @@ class CausalSelfAttention(nn.Module):
         # TODO: implement the forward pass of the casual self-attention layer.
         # project the input to key, query, value vectors
         # each of shape (B, T, n_embd)
-
+        q, k, v = self.c_attn(x).split(self.n_embed, dim = 2)
 
         # calculate query, key, values for all heads in batch and move head forward to be the batch dim
         # split q, k, v into multiple (self.n_head) heads
